@@ -8,19 +8,26 @@
       .marked {
         color: #efc14e;
       }
+
+      mark {
+        background-color: transparent;
+      }
     </style>
   </head>
   <body>
     <div id="app" style="margin-top: 2rem">
       <div class="container">
         <div class="form-group">
-          <input type="search" />
+          <input type="search" v-model="search" />
         </div>
         <ul>
-          <li>Email</li>
-          <li class="marked">Email</li>
-          <li>...</li>
-          <li>Email</li>
+          <li v-for="email in filteredEmails" :key="email">
+            <template v-if="!email.email">{{ email }}</template>
+            <template v-else>
+              <mark v-if="email.isMarked" class="marked">{{ email.email }}</mark>
+              <template v-else>{{ email.email }}</template>
+            </template>
+          </li>
         </ul>
       </div>
     </div>
