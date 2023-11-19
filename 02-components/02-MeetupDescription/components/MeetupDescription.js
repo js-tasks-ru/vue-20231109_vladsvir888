@@ -2,6 +2,8 @@ import { defineComponent } from '../vendor/vue.esm-browser.js';
 
 export default defineComponent({
   name: 'MeetupDescription',
-
-  template: `<p class="meetup-description">Описание должно быть здесь</p>`,
+  props: {
+    description: String
+  },
+  template: `<p class="meetup-description">{{ description }}</p>`,
 });
