@@ -12,10 +12,14 @@
       mark {
         background-color: transparent;
       }
+
+      [v-cloak] {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <div id="app" style="margin-top: 2rem">
+    <div id="app" style="margin-top: 2rem" v-cloak>
       <div class="container">
         <div class="form-group">
           <input type="search" v-model="search" />
