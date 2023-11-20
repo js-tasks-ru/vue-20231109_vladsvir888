@@ -19,16 +19,16 @@ const app = createApp({
     return {
       meetup: {
         title: '',
-        current: ''
-      }
-    }
+        current: '',
+      },
+    };
   },
   watch: {
     async 'meetup.current'(newValue) {
       const result = await fetchMeetupById(newValue);
       this.meetup.title = result.title;
-    }
-  }
+    },
+  },
 });
 
 app.mount('#app');

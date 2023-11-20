@@ -13,12 +13,7 @@
     <div id="app" v-cloak>
       <div>
         <label v-for="n in 5">
-          <input
-            type="radio"
-            name="meetupId"
-            :value="n"
-            v-model="meetup.current"
-          />
+          <input type="radio" name="meetupId" :value="n" v-model="meetup.current" />
           {{ n }}
         </label>
         <hr />
