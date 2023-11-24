@@ -9,20 +9,20 @@ export default defineComponent({
   components: {
     UiAlert,
     UiContainer,
-    MeetupView
+    MeetupView,
   },
   props: {
     meetupId: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
       loading: true,
       meetup: null,
-      error: null
-    }
+      error: null,
+    };
   },
   watch: {
     meetupId: {
@@ -38,7 +38,7 @@ export default defineComponent({
         }
       },
       immediate: true,
-    }
+    },
   },
   template: `
     <div class="page-meetup">
