@@ -10,19 +10,14 @@
     </style>
   </head>
   <body>
-    <div id="app">
+    <div id="app" v-cloak>
       <div>
-        <label v-for="n in 5" v-cloak>
-          <input
-            type="radio"
-            name="meetupId"
-            :value="n"
-            v-model="meetup.current"
-          />
+        <label v-for="n in 5">
+          <input type="radio" name="meetupId" :value="n" v-model="meetup.current" />
           {{ n }}
         </label>
         <hr />
-        <h3 v-cloak>{{ meetup.title }}</h3>
+        <h3>{{ meetup.title }}</h3>
       </div>
     </div>
     <script type="module" src="./script.js"></script>
