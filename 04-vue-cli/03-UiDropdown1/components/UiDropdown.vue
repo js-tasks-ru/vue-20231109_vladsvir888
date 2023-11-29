@@ -1,7 +1,7 @@
 <template>
-  <div class="dropdown" :class="{ dropdown_opened: open }">
+  <div class="dropdown" :class="{ dropdown_opened: open === id }">
     <button
-      @click.stop="open = !open"
+      @click.stop="$emit('toggle', id)"
       :class="{ dropdown__toggle_icon: classNameIcon }"
       class="dropdown__toggle"
       type="button"
@@ -10,21 +10,23 @@
       <span>{{ selectedOption.text || selectedOption }}</span>
     </button>
 
-    <div class="dropdown__menu" role="listbox" v-show="open">
-      <button
-        v-for="option in options"
-        @click="handleClickOption"
-        :key="option.value"
-        :value="option.value"
-        :class="{ dropdown__item_icon: classNameIcon }"
-        class="dropdown__item"
-        role="option"
-        type="button"
-      >
-        <UiIcon v-if="option.icon" :icon="option.icon" class="dropdown__icon" />
-        {{ option.text }}
-      </button>
-    </div>
+    <Transition name="fade">
+      <div class="dropdown__menu" role="listbox" v-show="open === id">
+        <button
+          v-for="option in options"
+          @click="handleClickOption"
+          :key="option.value"
+          :value="option.value"
+          :class="{ dropdown__item_icon: classNameIcon }"
+          class="dropdown__item"
+          role="option"
+          type="button"
+        >
+          <UiIcon v-if="option.icon" :icon="option.icon" class="dropdown__icon" />
+          {{ option.text }}
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -46,20 +48,18 @@ export default {
     modelValue: {
       type: String,
     },
+    id: {
+      type: Number,
+    },
+    open: {
+      type: Number,
+    },
   },
-  emits: ['update:modelValue'],
-  data() {
-    return {
-      open: false,
-    };
-  },
+  emits: ['update:modelValue', 'toggle'],
   methods: {
     handleClickOption(event) {
       this.$emit('update:modelValue', event.target.value);
-      this.close();
-    },
-    close() {
-      this.open = false;
+      this.$emit('toggle', this.id);
     },
   },
   computed: {
@@ -72,16 +72,19 @@ export default {
       return this.options.find((option) => option.value === this.modelValue);
     },
   },
-  mounted() {
-    document.addEventListener('click', this.close);
-  },
-  unmounted() {
-    document.addEventListener('click', this.close);
-  },
 };
 </script>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 .dropdown {
   position: relative;
   display: inline-block;
@@ -100,8 +103,8 @@ export default {
   line-height: 28px;
   color: initial;
   text-align: center;
-  transition-duration: 0.2s;
-  transition-property: background-color, fill, color;
+  transition-duration: 0.3s;
+  transition-property: background-color, fill, color, border-color;
   outline: none;
   box-shadow: none;
   cursor: pointer;

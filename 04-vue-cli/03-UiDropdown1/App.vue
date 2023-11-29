@@ -5,19 +5,33 @@
     <p><button @click="selectedType = 'registration'">Set registration</button></p>
     <p><button @click="updateOptions">Remove last option</button></p>
     <p>
-      <UiDropdown v-model="selectedType" :options="agendaItemTypes" title="Событие" />
+      <UiDropdown
+        @toggle="toggle"
+        v-model="selectedType"
+        :options="agendaItemTypes"
+        title="Событие"
+        :id="1"
+        :open="open"
+      />
     </p>
 
     <h2>Without icons</h2>
     <p>selectedLang = {{ selectedLang }}</p>
     <p>
-      <UiDropdown v-model="selectedLang" :options="langOptions" title="Язык" />
+      <UiDropdown @toggle="toggle" v-model="selectedLang" :options="langOptions" title="Язык" :id="2" :open="open" />
     </p>
 
     <h2>Mixed icons</h2>
     <p>selectedMixed = {{ selectedMixed }}</p>
     <p>
-      <UiDropdown v-model="selectedMixed" :options="mixedIconsOptions" title="Mixed icons" />
+      <UiDropdown
+        @toggle="toggle"
+        v-model="selectedMixed"
+        :options="mixedIconsOptions"
+        title="Mixed icons"
+        :id="3"
+        :open="open"
+      />
     </p>
   </div>
 </template>
@@ -94,6 +108,8 @@ export default {
       selectedLang: 'EN',
       selectedType: undefined,
       selectedMixed: undefined,
+
+      open: false,
     };
   },
 
@@ -101,6 +117,18 @@ export default {
     updateOptions() {
       this.agendaItemTypes.pop();
     },
+    toggle(id) {
+      this.open = this.open === id ? null : id;
+    },
+    handlerToggle() {
+      this.toggle(null);
+    },
+  },
+  mounted() {
+    document.addEventListener('click', this.handlerToggle);
+  },
+  unmounted() {
+    document.removeEventListener('click', this.handlerToggle);
   },
 };
 </script>
