@@ -15,8 +15,10 @@
     </p>
 
     <h2>Mixed icons</h2>
-    <UiDropdown v-model="selectedMixed" :options="mixedIconsOptions" title="Mixed icons" />
-    <p></p>
+    <p>selectedMixed = {{ selectedMixed }}</p>
+    <p>
+      <UiDropdown v-model="selectedMixed" :options="mixedIconsOptions" title="Mixed icons" />
+    </p>
   </div>
 </template>
 

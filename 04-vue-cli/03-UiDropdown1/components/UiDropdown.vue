@@ -1,18 +1,28 @@
 <template>
-  <div class="dropdown dropdown_opened">
-    <button type="button" class="dropdown__toggle dropdown__toggle_icon">
-      <UiIcon icon="tv" class="dropdown__icon" />
-      <span>Title</span>
+  <div class="dropdown" :class="{ dropdown_opened: open }">
+    <button
+      @click.stop="open = !open"
+      :class="{ dropdown__toggle_icon: classNameIcon }"
+      class="dropdown__toggle"
+      type="button"
+    >
+      <UiIcon v-if="selectedOption.icon" :icon="selectedOption.icon" class="dropdown__icon" />
+      <span>{{ selectedOption.text || selectedOption }}</span>
     </button>
 
-    <div class="dropdown__menu" role="listbox">
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 1
-      </button>
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 2
+    <div class="dropdown__menu" role="listbox" v-show="open">
+      <button
+        v-for="option in options"
+        @click="handleClickOption"
+        :key="option.value"
+        :value="option.value"
+        :class="{ dropdown__item_icon: classNameIcon }"
+        class="dropdown__item"
+        role="option"
+        type="button"
+      >
+        <UiIcon v-if="option.icon" :icon="option.icon" class="dropdown__icon" />
+        {{ option.text }}
       </button>
     </div>
   </div>
@@ -23,8 +33,51 @@ import UiIcon from './UiIcon.vue';
 
 export default {
   name: 'UiDropdown',
-
   components: { UiIcon },
+  props: {
+    options: {
+      type: Array,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    modelValue: {
+      type: String,
+    },
+  },
+  emits: ['update:modelValue'],
+  data() {
+    return {
+      open: false,
+    };
+  },
+  methods: {
+    handleClickOption(event) {
+      this.$emit('update:modelValue', event.target.value);
+      this.close();
+    },
+    close() {
+      this.open = false;
+    },
+  },
+  computed: {
+    classNameIcon() {
+      return this.options.find((option) => option.icon);
+    },
+    selectedOption() {
+      if (!this.modelValue) return this.title;
+
+      return this.options.find((option) => option.value === this.modelValue);
+    },
+  },
+  mounted() {
+    document.addEventListener('click', this.close);
+  },
+  unmounted() {
+    document.addEventListener('click', this.close);
+  },
 };
 </script>
 
