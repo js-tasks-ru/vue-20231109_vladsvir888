@@ -3,22 +3,21 @@
     <button
       @click.stop="open = !open"
       @blur="hideDropdown"
-      :class="{ dropdown__toggle_icon: classNameIcon }"
+      :class="{ dropdown__toggle_icon: isClassNameIcon }"
       class="dropdown__toggle"
       type="button"
     >
       <UiIcon v-if="selectedOption.icon" :icon="selectedOption.icon" class="dropdown__icon" />
       <span>{{ selectedOption.text || selectedOption }}</span>
     </button>
-
-    <Transition name="fade">
+    <UiTransitionFade>
       <div class="dropdown__menu" role="listbox" v-show="open">
         <button
           v-for="option in options"
           @click="handleClickOption"
           :key="option.value"
           :value="option.value"
-          :class="{ dropdown__item_icon: classNameIcon }"
+          :class="{ dropdown__item_icon: isClassNameIcon }"
           class="dropdown__item"
           role="option"
           type="button"
@@ -27,16 +26,17 @@
           {{ option.text }}
         </button>
       </div>
-    </Transition>
+    </UiTransitionFade>
   </div>
 </template>
 
 <script>
 import UiIcon from './UiIcon.vue';
+import UiTransitionFade from '../../../03-sfc/02-UiTransitionGroupFade/components/UiTransitionFade';
 
 export default {
   name: 'UiDropdown',
-  components: { UiIcon },
+  components: { UiIcon, UiTransitionFade },
   props: {
     options: {
       type: Array,
@@ -66,8 +66,8 @@ export default {
     },
   },
   computed: {
-    classNameIcon() {
-      return this.options.find((option) => option.icon);
+    isClassNameIcon() {
+      return this.options.some((option) => option.icon);
     },
     selectedOption() {
       if (!this.modelValue) return this.title;
@@ -85,15 +85,6 @@ export default {
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
 .dropdown {
   position: relative;
   display: inline-block;

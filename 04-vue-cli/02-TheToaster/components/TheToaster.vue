@@ -4,11 +4,10 @@
       v-for="toast in toasts"
       :key="toast.id"
       :id="toast.id"
-      :class="toast.className"
+      :variant="toast.variant"
       :message="toast.message"
-      :icon="toast.icon"
       :closable="toast.closable"
-      @close="removeToast"
+      @close="removeToast(toast.id)"
     ></UIToast>
   </div>
 </template>
@@ -29,23 +28,17 @@ export default {
   methods: {
     success(message) {
       this.addToast({
-        id: Date.now(),
-        className: 'toast_success',
+        id: Math.random(),
+        variant: 'success',
         message,
-        icon: {
-          name: 'check-circle',
-        },
         duration: 5000,
       });
     },
     error(message) {
       this.addToast({
-        id: Date.now(),
-        className: 'toast_error',
+        id: Math.random(),
+        variant: 'error',
         message,
-        icon: {
-          name: 'alert-circle',
-        },
         duration: 5000,
         closable: true,
       });
