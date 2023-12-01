@@ -1,7 +1,8 @@
 <template>
-  <div class="dropdown" :class="{ dropdown_opened: open === id }">
+  <div class="dropdown" :class="{ dropdown_opened: open }">
     <button
-      @click.stop="$emit('toggle', id)"
+      @click.stop="open = !open"
+      @blur="hideDropdown"
       :class="{ dropdown__toggle_icon: classNameIcon }"
       class="dropdown__toggle"
       type="button"
@@ -11,7 +12,7 @@
     </button>
 
     <Transition name="fade">
-      <div class="dropdown__menu" role="listbox" v-show="open === id">
+      <div class="dropdown__menu" role="listbox" v-show="open">
         <button
           v-for="option in options"
           @click="handleClickOption"
@@ -48,18 +49,20 @@ export default {
     modelValue: {
       type: String,
     },
-    id: {
-      type: Number,
-    },
-    open: {
-      type: Number,
-    },
   },
-  emits: ['update:modelValue', 'toggle'],
+  emits: ['update:modelValue'],
+  data() {
+    return {
+      open: false,
+    };
+  },
   methods: {
+    hideDropdown() {
+      this.open = false;
+    },
     handleClickOption(event) {
       this.$emit('update:modelValue', event.target.value);
-      this.$emit('toggle', this.id);
+      this.hideDropdown();
     },
   },
   computed: {
@@ -71,6 +74,12 @@ export default {
 
       return this.options.find((option) => option.value === this.modelValue);
     },
+  },
+  mounted() {
+    document.addEventListener('click', this.hideDropdown);
+  },
+  unmounted() {
+    document.removeEventListener('click', this.hideDropdown);
   },
 };
 </script>
