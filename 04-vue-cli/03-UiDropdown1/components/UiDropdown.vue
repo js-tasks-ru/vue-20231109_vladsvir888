@@ -1,30 +1,86 @@
 <template>
-  <div class="dropdown dropdown_opened">
-    <button type="button" class="dropdown__toggle dropdown__toggle_icon">
-      <UiIcon icon="tv" class="dropdown__icon" />
-      <span>Title</span>
+  <div class="dropdown" :class="{ dropdown_opened: open }">
+    <button
+      @click.stop="open = !open"
+      @blur="hideDropdown"
+      :class="{ dropdown__toggle_icon: isClassNameIcon }"
+      class="dropdown__toggle"
+      type="button"
+    >
+      <UiIcon v-if="selectedOption.icon" :icon="selectedOption.icon" class="dropdown__icon" />
+      <span>{{ selectedOption.text || selectedOption }}</span>
     </button>
-
-    <div class="dropdown__menu" role="listbox">
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 1
-      </button>
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <UiIcon icon="tv" class="dropdown__icon" />
-        Option 2
-      </button>
-    </div>
+    <UiTransitionFade>
+      <div class="dropdown__menu" role="listbox" v-show="open">
+        <button
+          v-for="option in options"
+          @click="handleClickOption"
+          :key="option.value"
+          :value="option.value"
+          :class="{ dropdown__item_icon: isClassNameIcon }"
+          class="dropdown__item"
+          role="option"
+          type="button"
+        >
+          <UiIcon v-if="option.icon" :icon="option.icon" class="dropdown__icon" />
+          {{ option.text }}
+        </button>
+      </div>
+    </UiTransitionFade>
   </div>
 </template>
 
 <script>
 import UiIcon from './UiIcon.vue';
+import UiTransitionFade from '../../../03-sfc/02-UiTransitionGroupFade/components/UiTransitionFade';
 
 export default {
   name: 'UiDropdown',
+  components: { UiIcon, UiTransitionFade },
+  props: {
+    options: {
+      type: Array,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    modelValue: {
+      type: String,
+    },
+  },
+  emits: ['update:modelValue'],
+  data() {
+    return {
+      open: false,
+    };
+  },
+  methods: {
+    hideDropdown() {
+      this.open = false;
+    },
+    handleClickOption(event) {
+      this.$emit('update:modelValue', event.target.value);
+      this.hideDropdown();
+    },
+  },
+  computed: {
+    isClassNameIcon() {
+      return this.options.some((option) => option.icon);
+    },
+    selectedOption() {
+      if (!this.modelValue) return this.title;
 
-  components: { UiIcon },
+      return this.options.find((option) => option.value === this.modelValue);
+    },
+  },
+  mounted() {
+    document.addEventListener('click', this.hideDropdown);
+  },
+  unmounted() {
+    document.removeEventListener('click', this.hideDropdown);
+  },
 };
 </script>
 
@@ -47,8 +103,8 @@ export default {
   line-height: 28px;
   color: initial;
   text-align: center;
-  transition-duration: 0.2s;
-  transition-property: background-color, fill, color;
+  transition-duration: 0.3s;
+  transition-property: background-color, fill, color, border-color;
   outline: none;
   box-shadow: none;
   cursor: pointer;
