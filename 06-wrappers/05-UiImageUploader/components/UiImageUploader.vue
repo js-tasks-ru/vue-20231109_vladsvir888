@@ -1,8 +1,20 @@
 <template>
   <div class="image-uploader">
-    <label class="image-uploader__preview image-uploader__preview-loading" style="--bg-url: url('/link.jpeg')">
-      <span class="image-uploader__text">Загрузить изображение</span>
-      <input type="file" accept="image/*" class="image-uploader__input" />
+    <label
+      class="image-uploader__preview"
+      :class="{ 'image-uploader__preview-loading': loading }"
+      :style="localPreview && `--bg-url: url('${localPreview}')`"
+    >
+      <span class="image-uploader__text">{{ text }}</span>
+      <input
+        ref="inputFile"
+        @click="handleFileClick"
+        @change="handleFileChange"
+        type="file"
+        accept="image/*"
+        class="image-uploader__input"
+        v-bind="$attrs"
+      />
     </label>
   </div>
 </template>
@@ -10,13 +22,74 @@
 <script>
 export default {
   name: 'UiImageUploader',
+  inheritAttrs: false,
+  props: {
+    preview: {
+      type: String,
+    },
+    uploader: {
+      type: Function,
+    },
+  },
+  emits: ['select', 'upload', 'error', 'remove'],
+  data() {
+    return {
+      loading: false,
+      selectedFile: '',
+      localPreview: this.preview,
+    };
+  },
+  computed: {
+    text() {
+      if (!this.localPreview && !this.selectedFile) {
+        return 'Загрузить изображение';
+      } else if (this.loading) {
+        return 'Загрузка...';
+      }
+      return 'Удалить изображение';
+    },
+  },
+  methods: {
+    async handleFileChange() {
+      const ref = this.$refs.inputFile;
+      const file = ref.files[0];
+
+      if (!file) return;
+
+      try {
+        this.localPreview = this.selectedFile = URL.createObjectURL(file);
+
+        if (!this.uploader) return;
+
+        this.loading = true;
+        const response = await this.uploader(file);
+        this.$emit('upload', response);
+      } catch (error) {
+        ref.value = '';
+        this.selectedFile = '';
+        this.localPreview = '';
+        this.$emit('error', error);
+      } finally {
+        this.loading = false;
+        this.$emit('select', file);
+      }
+    },
+    handleFileClick(event) {
+      const ref = this.$refs.inputFile;
+
+      if ((!ref.value && !this.localPreview) || this.loading) return;
+
+      event.preventDefault();
+      ref.value = '';
+      this.selectedFile = '';
+      this.localPreview = '';
+      this.$emit('remove');
+    },
+  },
 };
 </script>
 
 <style scoped>
-.image-uploader {
-}
-
 .image-uploader__input {
   opacity: 0;
   height: 0;
