@@ -1,5 +1,5 @@
 <template>
-  <UiInput ref="inputDate" :type="type" v-model="model">
+  <UiInput :type="type" :model-value="model" @input="model = $event.target.valueAsNumber">
     <template v-for="slotName in Object.keys($slots)" #[slotName]>
       <slot :name="slotName" />
     </template>
@@ -60,8 +60,8 @@ export default {
 
         return value;
       },
-      set() {
-        this.$emit('update:modelValue', this.$refs.inputDate.$refs.input.valueAsNumber);
+      set(value) {
+        this.$emit('update:modelValue', value);
       },
     },
   },
