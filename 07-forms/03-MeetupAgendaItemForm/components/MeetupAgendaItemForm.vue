@@ -1,37 +1,45 @@
 <template>
   <fieldset class="agenda-item-form">
-    <button type="button" class="agenda-item-form__remove-button">
+    <button type="button" class="agenda-item-form__remove-button" @click="$emit('remove')">
       <UiIcon icon="trash" />
     </button>
-
     <UiFormGroup>
-      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" />
+      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" v-model="localAgendaItem.type" />
     </UiFormGroup>
-
     <div class="agenda-item-form__row">
       <div class="agenda-item-form__col">
         <UiFormGroup label="Начало">
-          <UiInput type="time" placeholder="00:00" name="startsAt" />
+          <UiInput ref="startsAt" type="time" placeholder="00:00" name="startsAt" v-model="model" />
         </UiFormGroup>
       </div>
       <div class="agenda-item-form__col">
         <UiFormGroup label="Окончание">
-          <UiInput type="time" placeholder="00:00" name="endsAt" />
+          <UiInput ref="endsAt" type="time" placeholder="00:00" name="endsAt" v-model="localAgendaItem.endsAt" />
         </UiFormGroup>
       </div>
     </div>
-
-    <UiFormGroup label="Тема">
-      <UiInput name="title" />
+    <UiFormGroup label="Заголовок" v-if="typeProgram === 'other'">
+      <UiInput name="title" v-model="localAgendaItem.title" />
     </UiFormGroup>
-    <UiFormGroup label="Докладчик">
-      <UiInput name="speaker" />
+    <UiFormGroup label="Нестандартный текст (необязательно)" v-if="typeProgram !== 'talk' && typeProgram !== 'other'">
+      <UiInput name="title" v-model="localAgendaItem.title" />
     </UiFormGroup>
-    <UiFormGroup label="Описание">
-      <UiInput multiline name="description" />
+    <UiFormGroup label="Тема" v-if="typeProgram === 'talk'">
+      <UiInput name="title" v-model="localAgendaItem.title" />
     </UiFormGroup>
-    <UiFormGroup label="Язык">
-      <UiDropdown title="Язык" :options="$options.talkLanguageOptions" name="language" />
+    <UiFormGroup label="Докладчик" v-if="typeProgram === 'talk'">
+      <UiInput name="speaker" v-model="localAgendaItem.speaker" />
+    </UiFormGroup>
+    <UiFormGroup label="Описание" v-if="typeProgram === 'talk' || typeProgram === 'other'">
+      <UiInput multiline name="description" v-model="localAgendaItem.description" />
+    </UiFormGroup>
+    <UiFormGroup label="Язык" v-if="typeProgram === 'talk'">
+      <UiDropdown
+        title="Язык"
+        :options="$options.talkLanguageOptions"
+        name="language"
+        v-model="localAgendaItem.language"
+      />
     </UiFormGroup>
   </fieldset>
 </template>
@@ -76,18 +84,58 @@ const talkLanguageOptions = [
   { value: 'EN', text: 'EN' },
 ];
 
+function convertToDate(value) {
+  const [hours, minutes] = value.split(':');
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  return date;
+}
+
 export default {
   name: 'MeetupAgendaItemForm',
-
   agendaItemTypeOptions,
   talkLanguageOptions,
-
   components: { UiIcon, UiFormGroup, UiInput, UiDropdown },
-
   props: {
     agendaItem: {
       type: Object,
       required: true,
+    },
+  },
+  emits: ['remove', 'update:agendaItem'],
+  data() {
+    return {
+      localAgendaItem: { ...this.agendaItem },
+    };
+  },
+  watch: {
+    localAgendaItem: {
+      deep: true,
+      handler(newValue) {
+        this.$emit('update:agendaItem', { ...newValue });
+      },
+    },
+  },
+  computed: {
+    typeProgram() {
+      return this.localAgendaItem.type;
+    },
+
+    model: {
+      get() {
+        return this.localAgendaItem.startsAt;
+      },
+
+      set(value) {
+        const oldStartsAt = convertToDate(this.localAgendaItem.startsAt); // старое время начала
+        const oldEndsAt = convertToDate(this.localAgendaItem.endsAt); // старое время окончания
+        const duration = oldEndsAt - oldStartsAt; // продолжительность события
+        const newStartsAt = convertToDate(value); // новое время начала
+        const newEndsAt = new Date(newStartsAt.getTime() + duration); // новое время окончания
+        this.localAgendaItem.startsAt = value;
+        this.localAgendaItem.endsAt = newEndsAt.toTimeString().slice(0, 5);
+      },
     },
   },
 };

@@ -1,10 +1,4 @@
 <template>
-  <pre>
-    {{ meetup }}
-  </pre>
-  <pre>
-    {{ localMeetup }}
-  </pre>
   <form @submit.prevent="submit" class="meetup-form">
     <div class="meetup-form__content">
       <fieldset class="meetup-form__section">
