@@ -1,32 +1,35 @@
 <template>
   <fieldset class="agenda-item-form">
-    <button type="button" class="agenda-item-form__remove-button">
+    <button type="button" class="agenda-item-form__remove-button" @click="$emit('remove')">
       <UiIcon icon="trash" />
     </button>
 
     <UiFormGroup>
-      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" />
+      <UiDropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" v-model="localAgendaItem.type" />
     </UiFormGroup>
 
     <div class="agenda-item-form__row">
       <div class="agenda-item-form__col">
         <UiFormGroup label="Начало">
-          <UiInput type="time" placeholder="00:00" name="startsAt" />
+          <UiInput type="time" placeholder="00:00" name="startsAt" v-model="model" />
         </UiFormGroup>
       </div>
       <div class="agenda-item-form__col">
         <UiFormGroup label="Окончание">
-          <UiInput type="time" placeholder="00:00" name="endsAt" />
+          <UiInput type="time" placeholder="00:00" name="endsAt" v-model="localAgendaItem.endsAt" />
         </UiFormGroup>
       </div>
     </div>
 
-    <UiFormGroup label="Заголовок">
-      <UiInput name="title" />
-    </UiFormGroup>
-    <UiFormGroup label="Описание">
-      <UiInput multiline name="description" />
-    </UiFormGroup>
+    <template v-for="item in Object.entries(agendaItemFormSchema)" :key="item[0]">
+      <UiFormGroup :label="item[1].label">
+        <component
+          :is="item[1].component"
+          v-model="localAgendaItem[item[1].props.name]"
+          v-bind="item[1].props"
+        ></component>
+      </UiFormGroup>
+    </template>
   </fieldset>
 </template>
 
@@ -151,18 +154,56 @@ const agendaItemFormSchemas = {
   },
 };
 
+function convertToDate(value) {
+  const [hours, minutes] = value.split(':');
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  return date;
+}
+
 export default {
   name: 'MeetupAgendaItemForm',
-
   components: { UiIcon, UiFormGroup, UiInput, UiDropdown },
-
   agendaItemTypeOptions,
   agendaItemFormSchemas,
-
   props: {
     agendaItem: {
       type: Object,
       required: true,
+    },
+  },
+  emits: ['remove', 'update:agendaItem'],
+  data() {
+    return {
+      localAgendaItem: { ...this.agendaItem },
+    };
+  },
+  watch: {
+    localAgendaItem: {
+      deep: true,
+      handler(newValue) {
+        this.$emit('update:agendaItem', { ...newValue });
+      },
+    },
+  },
+  computed: {
+    agendaItemFormSchema() {
+      return this.$options.agendaItemFormSchemas[this.localAgendaItem.type];
+    },
+    model: {
+      get() {
+        return this.localAgendaItem.startsAt;
+      },
+      set(value) {
+        const oldStartsAt = convertToDate(this.localAgendaItem.startsAt); // старое время начала
+        const oldEndsAt = convertToDate(this.localAgendaItem.endsAt); // старое время окончания
+        const duration = oldEndsAt - oldStartsAt; // продолжительность события
+        const newStartsAt = convertToDate(value); // новое время начала
+        const newEndsAt = new Date(newStartsAt.getTime() + duration); // новое время окончания
+        this.localAgendaItem.startsAt = value;
+        this.localAgendaItem.endsAt = newEndsAt.toTimeString().slice(0, 5);
+      },
     },
   },
 };

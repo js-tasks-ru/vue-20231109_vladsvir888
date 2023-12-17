@@ -9,12 +9,12 @@
     <div class="agenda-item-form__row">
       <div class="agenda-item-form__col">
         <UiFormGroup label="Начало">
-          <UiInput ref="startsAt" type="time" placeholder="00:00" name="startsAt" v-model="model" />
+          <UiInput type="time" placeholder="00:00" name="startsAt" v-model="model" />
         </UiFormGroup>
       </div>
       <div class="agenda-item-form__col">
         <UiFormGroup label="Окончание">
-          <UiInput ref="endsAt" type="time" placeholder="00:00" name="endsAt" v-model="localAgendaItem.endsAt" />
+          <UiInput type="time" placeholder="00:00" name="endsAt" v-model="localAgendaItem.endsAt" />
         </UiFormGroup>
       </div>
     </div>
