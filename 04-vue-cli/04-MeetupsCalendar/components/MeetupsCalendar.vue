@@ -48,7 +48,6 @@ import { addDays, addMonths, getFirstDateOfMonth, getLastDateOfMonth, getWeekday
 
 export default {
   name: 'MeetupsCalendar',
-
   props: {
     meetups: {
       type: Array,
@@ -117,9 +116,6 @@ export default {
 </script>
 
 <style scoped>
-.calendar-view {
-}
-
 .calendar-view__controls {
   text-align: center;
   font-weight: 700;
