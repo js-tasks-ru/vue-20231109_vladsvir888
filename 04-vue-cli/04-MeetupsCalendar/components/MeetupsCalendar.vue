@@ -1,23 +1,42 @@
 <template>
-  <div class="calendar-view 123">
+  <div class="calendar-view">
     <div class="calendar-view__controls">
       <div class="calendar-view__controls-inner">
         <button
           class="calendar-view__control-left"
           type="button"
           aria-label="Previous month"
-          @click="previousMonth"
+          @click.stop="setPreviousMonth"
         ></button>
-        <div class="calendar-view__date">{{ localeDate }}</div>
-        <button class="calendar-view__control-right" type="button" aria-label="Next month" @click="nextMonth"></button>
+        <div class="calendar-view__date">{{ localDate }}</div>
+        <button
+          class="calendar-view__control-right"
+          type="button"
+          aria-label="Next month"
+          @click.stop="setNextMonth"
+        ></button>
       </div>
     </div>
 
     <div class="calendar-view__grid">
-      <div v-for="cell in calendar" :key="cell" class="calendar-view__cell" :class="cell.dateClass" tabindex="0">
-        <div class="calendar-view__cell-day">{{ cell.day }}</div>
+      <div
+        v-for="cell in calendarCells"
+        :key="cell.timestamp"
+        class="calendar-view__cell"
+        :class="{ 'calendar-view__cell_inactive': !cell.isCurrentMonth }"
+        :aria-label="cell.localDateString"
+        tabindex="0"
+      >
+        <div class="calendar-view__cell-day">{{ cell.date }}</div>
         <div class="calendar-view__cell-content">
-          <a v-for="meetup in getMeetups(cell)" :key="meetup" href="#" class="calendar-event">{{ meetup.title }}</a>
+          <a
+            v-for="meetup in meetupsByDate[cell.timestamp]"
+            :key="meetup.id"
+            :href="`/meetups/${meetup.id}`"
+            class="calendar-event"
+          >
+            {{ meetup.title }}
+          </a>
         </div>
       </div>
     </div>
@@ -25,6 +44,8 @@
 </template>
 
 <script>
+import { addDays, addMonths, getFirstDateOfMonth, getLastDateOfMonth, getWeekday } from '../utils/dateUtils.js';
+
 export default {
   name: 'MeetupsCalendar',
   props: {
@@ -33,59 +54,62 @@ export default {
       required: true,
     },
   },
+
   data() {
     return {
-      date: new Date(),
+      currentDate: getFirstDateOfMonth(new Date()),
     };
   },
+
   computed: {
-    calendar() {
-      const currentYear = this.date.getFullYear();
-      const currentMonth = this.date.getMonth();
-      const firstDayMonth = new Date(currentYear, currentMonth, 1);
-      const dayWeekFirstDayMonth = firstDayMonth.getDay();
-      const numberPreviousMonthDays = (dayWeekFirstDayMonth + 6) % 7; // количество дней предыдущего месяца, которые попали на неделю текущего месяца
-      const startDate = new Date(currentYear, currentMonth, 1 - numberPreviousMonthDays); // дата предыдущего месяца, с которой идет отсчет для нахождения дней предыдущего месяца
-      const lastDayMonth = new Date(currentYear, currentMonth + 1, 0);
-      const dayMonthLastDayMonth = lastDayMonth.getDate();
-      const dayWeekLastDayMonth = lastDayMonth.getDay();
-      const numberNextMonthDays = !dayWeekLastDayMonth ? dayWeekLastDayMonth : 7 - dayWeekLastDayMonth; // количество дней следующего месяца, которые попали на неделю текущего месяца
-      const endDate = new Date(currentYear, currentMonth + 1, 1); // дата следующего месяца, с которой идет отсчет для нахождения дней следующего месяца
-      const calendar = [];
-
-      function generateDays(number, initDate, inactiveDate) {
-        for (let i = 0; i < number; i += 1) {
-          const date = new Date(initDate.getFullYear(), initDate.getMonth(), initDate.getDate() + i, 3, 0, 0);
-          calendar.push({
-            date: Number(date),
-            day: date.getDate(),
-            dateClass: inactiveDate ? 'calendar-view__cell_inactive' : '',
-          });
-        }
-      }
-
-      generateDays(numberPreviousMonthDays, startDate, true);
-      generateDays(dayMonthLastDayMonth, firstDayMonth, false);
-      generateDays(numberNextMonthDays, endDate, true);
-
-      return calendar;
-    },
-    localeDate() {
-      return this.date.toLocaleDateString(window.navigator.language, {
+    localDate() {
+      return this.currentDate.toLocaleDateString(navigator.language, {
         month: 'long',
         year: 'numeric',
       });
     },
+
+    calendarCells() {
+      const lastDateOfMonth = getLastDateOfMonth(this.currentDate);
+      const startDate = addDays(this.currentDate, -(getWeekday(this.currentDate) - 1));
+      const finishDate = addDays(lastDateOfMonth, 7 - getWeekday(lastDateOfMonth));
+
+      const cells = [];
+
+      for (let dayOfCalendar = startDate; dayOfCalendar <= finishDate; dayOfCalendar = addDays(dayOfCalendar, 1)) {
+        cells.push({
+          timestamp: +dayOfCalendar,
+          year: dayOfCalendar.getUTCFullYear(),
+          month: dayOfCalendar.getUTCMonth(),
+          date: dayOfCalendar.getUTCDate(),
+          isCurrentMonth: dayOfCalendar.getUTCMonth() === this.currentDate.getUTCMonth(),
+          localDateString: dayOfCalendar.toLocaleDateString(navigator.language, { dateStyle: 'long' }),
+        });
+      }
+
+      return cells;
+    },
+
+    meetupsByDate() {
+      const result = {};
+      for (const meetup of this.meetups) {
+        if (!result[meetup.date]) {
+          result[meetup.date] = [meetup];
+        } else {
+          result[meetup.date].push(meetup);
+        }
+      }
+      return result;
+    },
   },
+
   methods: {
-    previousMonth() {
-      this.date = new Date(this.date.setMonth(this.date.getMonth() - 1));
+    setPreviousMonth() {
+      this.currentDate = addMonths(this.currentDate, -1);
     },
-    nextMonth() {
-      this.date = new Date(this.date.setMonth(this.date.getMonth() + 1));
-    },
-    getMeetups(cell) {
-      return this.meetups.filter((meetup) => meetup.date === cell.date);
+
+    setNextMonth() {
+      this.currentDate = addMonths(this.currentDate, 1);
     },
   },
 };
