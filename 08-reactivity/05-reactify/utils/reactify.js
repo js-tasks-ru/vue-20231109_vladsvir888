@@ -1,4 +1,4 @@
-import { computed, unref, watch } from 'vue';
+import { computed, unref } from 'vue';
 
 /**
  * @template T
