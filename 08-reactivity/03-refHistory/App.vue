@@ -19,6 +19,7 @@ export default {
     this.source = ref(0);
 
     const { history } = refHistory(this.source);
+
     this.history = history;
   },
 };
