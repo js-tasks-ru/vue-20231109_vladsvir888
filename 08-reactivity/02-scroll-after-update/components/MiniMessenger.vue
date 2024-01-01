@@ -46,7 +46,13 @@ export default {
       this.newMessage = '';
 
       await nextTick();
-      this.$refs.messages.scrollTop = this.$refs.messages.scrollHeight;
+
+      this.scrollMessagesToBottom();
+    },
+
+    scrollMessagesToBottom() {
+      const messages = this.$refs.messages;
+      messages.scrollTop = messages.scrollHeight;
     },
   },
 };
