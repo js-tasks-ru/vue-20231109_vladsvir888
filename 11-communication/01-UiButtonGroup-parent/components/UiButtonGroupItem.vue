@@ -1,5 +1,13 @@
 <template>
-  <button class="button-group__button button-group__button_active" type="button" aria-selected="false">Button</button>
+  <button
+    @click="$parent.update(value)"
+    class="button-group__button"
+    :class="{ 'button-group__button_active': $parent.modelValue === value }"
+    :aria-selected="$parent.modelValue === value"
+    type="button"
+  >
+    <slot />
+  </button>
 </template>
 
 <script>
@@ -10,6 +18,12 @@ export default {
     value: {
       required: true,
     },
+  },
+
+  created() {
+    if (this.$parent.$options.name !== 'UiButtonGroup') {
+      console.warn('UiButtonGroupItem должен использоваться в UiButtonGroup.');
+    }
   },
 };
 </script>
