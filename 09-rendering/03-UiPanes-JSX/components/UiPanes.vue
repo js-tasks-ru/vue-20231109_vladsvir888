@@ -42,7 +42,7 @@ export default {
             <div class="pane__content">{slot}</div>
             <div class="pane__controls">
               <UiButton
-                class={index === 0 ? 'pane__disabled-button' : ''}
+                class={{ 'pane__disabled-button': index === 0 }}
                 variant="secondary"
                 block
                 onClick={() => this.up(index)}
@@ -50,7 +50,7 @@ export default {
                 Up
               </UiButton>
               <UiButton
-                class={index + 1 === this.slots.length ? 'pane__disabled-button' : ''}
+                class={{ 'pane__disabled-button': index + 1 === this.slots.length }}
                 variant="danger"
                 block
                 onClick={() => this.down(index)}

@@ -1,10 +1,20 @@
 <template>
-  <button class="button-group__button button-group__button_active" type="button" aria-selected="false">Button</button>
+  <button
+    class="button-group__button"
+    :class="{ 'button-group__button_active': buttonGroup.value.value === value }"
+    :aria-selected="buttonGroup.value.value === value"
+    type="button"
+    @click="buttonGroup.updateValue(value)"
+  >
+    <slot />
+  </button>
 </template>
 
 <script>
 export default {
   name: 'UiButtonGroupItem',
+
+  inject: ['buttonGroup'],
 
   props: {
     value: {

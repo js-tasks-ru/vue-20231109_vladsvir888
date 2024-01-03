@@ -6,12 +6,12 @@ import { ref, watch } from 'vue';
  * @returns {Object<{ history: Ref<T[]> }>} - История изменения source
  */
 export function refHistory(source) {
-  const newSource = [];
+  const history = ref([]);
 
   watch(
     source,
     (newValue) => {
-      newSource.push(newValue);
+      history.value.push(newValue);
     },
     {
       immediate: true,
@@ -19,7 +19,5 @@ export function refHistory(source) {
     },
   );
 
-  const history = ref(newSource);
-  // ...
   return { history };
 }
