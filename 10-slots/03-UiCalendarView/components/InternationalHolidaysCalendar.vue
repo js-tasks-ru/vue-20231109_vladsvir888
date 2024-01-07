@@ -1,6 +1,6 @@
 <template>
-  <UiCalendarView>
-    <div v-for="holiday in internationalHolidaysMap[0][7]" :key="holiday" class="holiday">
+  <UiCalendarView v-slot="{ cell }">
+    <div v-for="holiday in internationalHolidaysMap[cell.month][cell.date]" :key="holiday" class="holiday">
       {{ holiday }}
     </div>
   </UiCalendarView>
@@ -66,6 +66,7 @@ export default {
     // В каждом объекте поле - это день, а значение - массив праздников в этот день
     internationalHolidaysMap() {
       const result = Array.from(Array(12), () => ({}));
+
       for (const { date, month, holiday } of this.internationalHolidays) {
         const jsMonth = month - 1;
         if (!result[jsMonth][date]) {
@@ -74,6 +75,7 @@ export default {
           result[jsMonth][date].push(holiday);
         }
       }
+
       return result;
     },
   },

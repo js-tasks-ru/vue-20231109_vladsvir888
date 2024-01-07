@@ -1,7 +1,12 @@
 <template>
-  <UiCalendarView>
-    <UiCalendarEvent v-if="meetups[0]" tag="a" :href="`/meetups/${meetups[0].id}`">
-      {{ meetups[0].title }}
+  <UiCalendarView v-slot="{ cell }">
+    <UiCalendarEvent
+      v-for="calendarEvent in meetupsByDate[cell.timestamp]"
+      :key="calendarEvent.id"
+      tag="a"
+      :href="`/meetups/${calendarEvent.id}`"
+    >
+      {{ calendarEvent.title }}
     </UiCalendarEvent>
   </UiCalendarView>
 </template>
@@ -22,6 +27,23 @@ export default {
     meetups: {
       type: Array,
       required: true,
+    },
+  },
+
+  computed: {
+    meetupsByDate() {
+      const result = {};
+      for (const meetup of this.meetups) {
+        if (!result[meetup.date]) {
+          result[meetup.date] = [meetup];
+        } else {
+          result[meetup.date].push(meetup);
+        }
+      }
+
+      console.log(result);
+
+      return result;
     },
   },
 };
