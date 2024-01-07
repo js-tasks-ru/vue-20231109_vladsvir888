@@ -18,7 +18,7 @@ export function createProgress({ container, router } = {}) {
     fail: progressInstance.fail,
     install(app) {
       app.provide(PROGRESS_KEY, progress);
-    }
+    },
   };
 
   if (router) {
