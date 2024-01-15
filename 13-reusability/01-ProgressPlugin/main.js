@@ -5,7 +5,4 @@ import { createProgress } from './plugins/progress/index.js';
 
 const progress = createProgress({ router });
 
-createApp(App)
-  .use(router)
-  .use(progress)
-  .mount('#app');
+createApp(App).use(router).use(progress).mount('#app');

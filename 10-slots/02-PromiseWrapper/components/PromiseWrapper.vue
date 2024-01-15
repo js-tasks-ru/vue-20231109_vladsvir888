@@ -1,7 +1,7 @@
 <template>
-  <slot v-if="!result && !error" name="pending" />
   <slot v-if="result" name="fulfilled" :result="result" />
-  <slot v-if="error" name="rejected" :error="error" />
+  <slot v-else-if="error" name="rejected" :error="error" />
+  <slot v-else name="pending" />
 </template>
 
 <script>
